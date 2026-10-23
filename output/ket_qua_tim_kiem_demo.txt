@@ -1,0 +1,18 @@
+Truy vấn q1_astronaut_noise_bright_jpeg40.jpg (đúng: astronaut)
+   d=  8  astronaut__dark.png
+   d=  8  astronaut__noise10.png
+   d=  8  astronaut__noise25.png
+   d=  9  astronaut__blur.png
+   d=  9  astronaut__jpeg20.jpg
+Truy vấn q2_horse_blur_crop.png (đúng: horse)
+   d= 22  horse__crop90.png
+   d= 40  horse__blur.png
+   d= 40  horse__bright.png
+   d= 40  horse__jpeg20.jpg
+   d= 40  horse__orig.png
+Truy vấn q3_coffee_rot_noise.png (đúng: coffee)
+   d= 35  coffee__blur.png
+   d= 36  coffee__dark.png
+   d= 36  coffee__noise10.png
+   d= 37  coffee__bright.png
+   d= 37  coffee__noise25.png

@@ -1,0 +1,9 @@
+,chinh: ll_median db4 L3,detail_sign haar L3 (ung dung),quant_gray db2 L2,aHash (doi chung)
+blur,1.0,1.0,1.0,1.0
+bright,1.0,1.0,1.0,1.0
+crop90,0.81,0.88,0.94,0.94
+dark,1.0,1.0,1.0,1.0
+jpeg20,1.0,1.0,1.0,1.0
+noise10,1.0,1.0,1.0,1.0
+noise25,1.0,1.0,1.0,1.0
+rot5,0.44,1.0,1.0,0.81

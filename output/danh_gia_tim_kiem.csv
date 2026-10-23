@@ -1,0 +1,5 @@
+,Top-1,Top-5,Precision@8,mAP
+chinh: ll_median db4 L3,0.889,0.917,0.817,0.842
+ung dung: detail_sign haar L3,0.993,1.0,0.982,0.99
+quant_gray db2 L2,0.993,1.0,0.99,0.994
+aHash (doi chung),0.965,0.979,0.947,0.955

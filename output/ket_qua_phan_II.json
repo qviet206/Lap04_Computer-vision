@@ -1,0 +1,24 @@
+{
+  "config": "ll_median db4 L3",
+  "bits": 196,
+  "threshold": 64.0,
+  "AUC": 0.9475454083382324,
+  "TP": 241,
+  "FP": 144,
+  "TN": 2124,
+  "FN": 47,
+  "accuracy": 0.9252738654147105,
+  "sensitivity": 0.8368055555555556,
+  "specificity": 0.9365079365079365,
+  "precision": 0.625974025974026,
+  "train_groups": [
+    "astronaut",
+    "cell",
+    "coffee",
+    "coins",
+    "gravel",
+    "horse",
+    "hubble_deep_field",
+    "rocket"
+  ]
+}

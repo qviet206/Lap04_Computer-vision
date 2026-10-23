@@ -1,0 +1,40 @@
+[Bước 1] 144 ảnh, 16 nhóm | 10296 cặp: 576 tương tự, 9720 không tương tự
+[Bước 3-4] mã 196 bit | d TB tương tự = 23.5, không tương tự = 99.1
+[Bước 5] T = 64 | accuracy 0.9253 | độ nhạy 0.8368 | độ đặc hiệu 0.9365 | precision 0.6260 | AUC 0.9475
+[III.1] AUC theo phương pháp:
+                  min    mean     max
+method                              
+ahash         0.9826  0.9826  0.9826
+detail_sign   0.8658  0.9594  0.9979
+ll_median     0.8982  0.9623  0.9971
+quant_gray    0.8934  0.9648  0.9989
+slide_parity  0.6530  0.6728  0.7101
+     method wavelet  level  bits    AUC
+ quant_gray     db2      2   648 0.9989
+ quant_gray bior1.3      2   722 0.9979
+detail_sign    haar      3   192 0.9979
+ quant_gray    haar      2   512 0.9976
+  ll_median     db2      2   324 0.9971
+  ll_median    haar      2   256 0.9970
+ quant_gray     db4      2   882 0.9960
+ quant_gray    sym4      2   882 0.9948
+ quant_gray     db2      3   200 0.9940
+detail_sign    haar      4    48 0.9937
+[III.1] Độ nhạy theo biến thể:
+          chinh: ll_median db4 L3  detail_sign haar L3 (ung dung)  quant_gray db2 L2  aHash (doi chung)
+blur                        1.00                            1.00               1.00               1.00
+bright                      1.00                            1.00               1.00               1.00
+crop90                      0.81                            0.88               0.94               0.94
+dark                        1.00                            1.00               1.00               1.00
+jpeg20                      1.00                            1.00               1.00               1.00
+noise10                     1.00                            1.00               1.00               1.00
+noise25                     1.00                            1.00               1.00               1.00
+rot5                        0.44                            1.00               1.00               0.81
+[III.2] chỉ mục 144 ảnh, 192 bit, 3.4 KB
+                               Top-1  Top-5  Precision@8    mAP
+chinh: ll_median db4 L3        0.889  0.917        0.817  0.842
+ung dung: detail_sign haar L3  0.993  1.000        0.982  0.990
+quant_gray db2 L2              0.993  1.000        0.990  0.994
+aHash (doi chung)              0.965  0.979        0.947  0.955
+
+Xong. Kết quả nằm trong: C:\Users\Quoc Viet\Downloads\lap04\wavelet_lab\output
