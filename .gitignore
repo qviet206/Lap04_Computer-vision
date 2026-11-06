@@ -1,0 +1,23 @@
+# ---- Môi trường ảo / biến môi trường (không đưa lên Git) ----
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# ---- Editor / hệ điều hành ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---- Kết quả sinh ra khi chạy (bỏ comment 2 dòng dưới nếu KHÔNG muốn commit output) ----
+# output/*
+# !output/.gitkeep
