@@ -1,70 +1,61 @@
-"""Chuẩn bị dữ liệu: tạo ảnh (DatasetBuilder) và nạp/ghép cặp (ImageDataset)."""
+
+import io
+import re
+import zipfile
+import urllib.request
+from pathlib import Path
 import numpy as np
 import pandas as pd
-from PIL import Image, ImageEnhance, ImageFilter
-from skimage import data as skdata
-
+from PIL import Image
 from config import Config
 
+URL = "https://www.cs.columbia.edu/CAVE/databases/SLAM_coil-20_coil-100/coil-20/coil-20-proc.zip"
+POSES = (0, 4, 8, 12, 16, 20, 24, 28, 32)
+QUERY_POSE = 6
 
 class DatasetBuilder:
-    """Sinh bộ ảnh: mỗi ảnh gốc + 8 biến thể (cùng nhóm = 'tương tự')."""
-    VARIANTS = ("noise10", "noise25", "blur", "bright", "dark", "rot5", "crop90", "jpeg20")
-
-    def __init__(self, cfg: Config):
+    def __init__(self, cfg):
         self.cfg = cfg
-        self.rng = np.random.default_rng(cfg.seed)
 
-    def _variants(self, img: Image.Image) -> dict:
-        a = np.asarray(img, dtype=np.float64)
-        out = {}
-        for s in (10, 25):
-            out[f"noise{s}"] = Image.fromarray(np.clip(a + self.rng.normal(0, s, a.shape), 0, 255).astype(np.uint8))
-        out["blur"] = img.filter(ImageFilter.GaussianBlur(2))
-        out["bright"] = ImageEnhance.Brightness(img).enhance(1.4)
-        out["dark"] = ImageEnhance.Brightness(img).enhance(0.7)
-        out["rot5"] = img.rotate(5, resample=Image.BICUBIC)
-        w, h = img.size
-        dw, dh = int(w * 0.05), int(h * 0.05)
-        out["crop90"] = img.crop((dw, dh, w - dw, h - dh)).resize((w, h), Image.BICUBIC)
-        out["jpeg20"] = img                       # nén JPEG q=20 khi lưu
-        return out
+    def build(self):
+        archive = self.cfg.root / "coil-20-proc.zip"
+        if not archive.exists():
+            print("Đang tải COIL-20 từ Columbia University...")
+            try:
+                with urllib.request.urlopen(URL, timeout=60) as response:
+                    payload = response.read()
+                with zipfile.ZipFile(io.BytesIO(payload)) as z:
+                    if not z.namelist():
+                        raise ValueError("ZIP rỗng")
+                archive.write_bytes(payload)
+            except Exception as exc:
+                raise RuntimeError("Không tải được COIL-20. Tải coil-20-proc.zip theo README và đặt cạnh requirements.txt.") from exc
+        with zipfile.ZipFile(archive) as z:
+            files = {}
+            for entry in z.namelist():
+                match = re.fullmatch(r"obj(\d+)__(\d+)\.png", Path(entry).name, re.I)
+                if match:
+                    files[tuple(map(int, match.groups()))] = entry
+            tasks = []
+            for obj in range(1, 17):
+                for pose in POSES:
+                    tasks.append((obj, pose, self.cfg.data_dir / f"obj{obj:02d}__view{pose*5:03d}.png"))
+            for obj in (1, 2, 3):
+                tasks.append((obj, QUERY_POSE, self.cfg.query_dir / f"obj{obj:02d}__view{QUERY_POSE*5:03d}.png"))
+            missing = [(o,p) for o,p,_ in tasks if (o,p) not in files]
+            if missing:
+                raise ValueError(f"ZIP thiếu ảnh COIL-20: {missing[:5]}")
+            for o,p,target in tasks:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with Image.open(io.BytesIO(z.read(files[o,p]))) as im:
+                    im.load()
+                    im.save(target)
 
-    def build(self) -> None:
-        d = self.cfg.data_dir
-        d.mkdir(parents=True, exist_ok=True)
-        for name in self.cfg.sources:
-            im = getattr(skdata, name)()
-            im = im[0] if isinstance(im, tuple) else im
-            im = Image.fromarray(im).convert("RGB")
-            im.thumbnail((256, 256))
-            im.save(d / f"{name}__orig.png")
-            for v, vi in self._variants(im).items():
-                if v == "jpeg20":
-                    vi.save(d / f"{name}__{v}.jpg", quality=20)
-                else:
-                    vi.save(d / f"{name}__{v}.png")
-
-    def build_queries(self, groups_info) -> list:
-        """Tạo các ảnh truy vấn kết hợp nhiều biến đổi (không nằm trong chỉ mục)."""
-        qd = self.cfg.query_dir
-        qd.mkdir(parents=True, exist_ok=True)
-        rq = np.random.default_rng(7)
-        src = lambda n: Image.open(self.cfg.data_dir / f"{n}__orig.png").convert("RGB")
-
-        def noisy(im, s):
-            a = np.asarray(im, float)
-            return Image.fromarray(np.clip(a + rq.normal(0, s, a.shape), 0, 255).astype(np.uint8))
-
-        q1 = noisy(ImageEnhance.Brightness(src("astronaut")).enhance(1.2), 15)
-        q1.save(qd / "q1_astronaut_noise_bright_jpeg40.jpg", quality=40)
-        q2 = src("horse").filter(ImageFilter.GaussianBlur(1))
-        w, h = q2.size
-        q2.crop((int(.07 * w), int(.07 * h), int(.93 * w), int(.93 * h))).resize((w, h)).save(qd / "q2_horse_blur_crop.png")
-        noisy(src("coffee").rotate(-3, resample=Image.BICUBIC), 15).save(qd / "q3_coffee_rot_noise.png")
-        return [(qd / "q1_astronaut_noise_bright_jpeg40.jpg", "astronaut"),
-                (qd / "q2_horse_blur_crop.png", "horse"),
-                (qd / "q3_coffee_rot_noise.png", "coffee")]
+    def build_queries(self, groups_info=None):
+        queries = [(self.cfg.query_dir / f"obj{o:02d}__view030.png", f"obj{o:02d}") for o in (1,2,3)]
+        if not all(p.is_file() for p,_ in queries):
+            self.build()
+        return queries
 
 
 class ImageDataset:

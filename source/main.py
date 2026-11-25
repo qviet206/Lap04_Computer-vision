@@ -37,7 +37,7 @@ class Lab4Pipeline:
         print(f"[Bước 1] {len(ds)} ảnh, {ds.meta.group.nunique()} nhóm | {len(ds.y)} cặp: "
               f"{ds.y.sum()} tương tự, {(~ds.y).sum()} không tương tự")
         self.rep.gallery(ds)
-        self.rep.decomposition(ds.grays[ds.index_of("astronaut", "orig")])
+        self.rep.decomposition(ds.grays[ds.index_of(self.cfg.sources[0], "view000")])
 
         hasher = create_hasher(**MAIN)                                   # Bước 2-3
         H = hasher.hash_many(ds.grays)
@@ -56,7 +56,7 @@ class Lab4Pipeline:
         self.results["part2"] = res
         self.results["n_pairs"] = (len(ds.y), int(ds.y.sum()))
         self.results["mean_d"] = (float(dist[ds.y].mean()), float(dist[~ds.y].mean()), L)
-        (out / "ket_qua_phan_II.json").write_text(json.dumps(res, ensure_ascii=False, indent=2))
+        (out / "ket_qua_phan_II.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"[Bước 5] T = {T:.0f} | accuracy {bm.accuracy:.4f} | độ nhạy {bm.sensitivity:.4f} | "
               f"độ đặc hiệu {bm.specificity:.4f} | precision {bm.precision:.4f} | AUC {roc.auc:.4f}")
 
@@ -74,9 +74,9 @@ class Lab4Pipeline:
                    "quant_gray db2 L2": dict(method="quant_gray", wavelet="db2", level=2),
                    "aHash (doi chung)": dict(method="ahash")}
         tab = self.survey.per_variant_sensitivity(configs).round(2)
-        tab.to_csv(out / "do_nhay_theo_bien_the.csv")
+        tab.to_csv(out / "do_nhay_theo_goc_chup.csv")
         self.results["per_variant"] = tab
-        print("[III.1] Độ nhạy theo biến thể:\n", tab.to_string())
+        print("[III.1] Độ nhạy theo góc chụp:\n", tab.to_string())
 
     # ---------------- Phần III.2 ----------------
     def part3_search(self):
@@ -131,13 +131,13 @@ class Lab4Pipeline:
             f"- `slide_parity` (chẵn/lẻ hệ số theo ý slide): AUC từ {parity.min():.3f} đến {parity.max():.3f}.",
             f"- Cấu hình mặc định của slide (`{MAIN['wavelet']}` mức {MAIN['level']}, `{MAIN['method']}`): AUC {main_row.AUC:.4f}; aHash (không dùng wavelet): AUC {ah:.4f}.",
             f"- Cấu hình gọn (≤ 256 bit) tốt nhất: `{compact.method} {compact.wavelet} L{compact.level}` – AUC {compact.AUC:.4f}, {int(compact.bits)} bit.", "",
-            "Độ nhạy theo từng biến thể (ngưỡng kiểm định chéo 2 phần):", "", "```", r["per_variant"].to_string(), "```", "",
+            "Độ nhạy theo từng góc chụp (ngưỡng kiểm định chéo 2 phần):", "", "```", r["per_variant"].to_string(), "```", "",
             "## Phần III.2 – tìm kiếm ảnh",
             f"Chỉ mục: {r['index_info'][0]} ảnh, {r['index_info'][1]} bit/ảnh, {r['index_info'][2]:.1f} KB. Truy vấn lần lượt từng ảnh (bỏ chính nó):", "",
             "```", r["retrieval"].to_string(), "```", "",
             "Kết quả demo 3 ảnh truy vấn: xem `ket_qua_tim_kiem_demo.txt` và `figures/07_demo_tim_kiem_anh.png`.", "",
             "## Lưu ý",
-            "- Dữ liệu tự tạo từ ảnh mẫu với 8 biến đổi đơn giản nên kết quả lạc quan hơn ảnh thật; chưa kiểm tra xoay lớn, đổi tỉ lệ, đổi góc nhìn.",
+            "- COIL-20 gồm ảnh chụp cùng vật thể ở các góc khác nhau. Wavelet hash đo tương đồng thị giác, không đảm bảo nhận dạng vật thể khi góc nhìn thay đổi lớn. Chưa đánh giá khuôn mặt theo độ tuổi.",
             "- Cấu hình tốt nhất được chọn trên chính tập dữ liệu này; ngưỡng phân loại thì chọn trên nhóm huấn luyện và đánh giá trên nhóm kiểm tra.", ""]
         (self.cfg.output_dir / "bao_cao.md").write_text("\n".join(lines), encoding="utf-8")
 

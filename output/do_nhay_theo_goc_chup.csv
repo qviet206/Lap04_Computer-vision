@@ -1,0 +1,9 @@
+,chinh: ll_median db4 L3,detail_sign haar L3 (ung dung),quant_gray db2 L2,aHash (doi chung)
+view020,0.81,0.94,0.94,0.94
+view040,0.44,0.69,0.81,0.75
+view060,0.38,0.5,0.5,0.5
+view080,0.25,0.56,0.5,0.56
+view100,0.25,0.56,0.5,0.44
+view120,0.38,0.44,0.44,0.38
+view140,0.56,0.5,0.62,0.56
+view160,0.56,0.62,0.75,0.62

@@ -20,20 +20,20 @@ class Reporter:
         plt.savefig(self.fig_dir / name, dpi=130, bbox_inches="tight")
         plt.close()
 
-    def gallery(self, ds, group="astronaut"):
+    def gallery(self, ds, group="obj01"):
         g0 = ds.meta[ds.meta.group == group]
         fig, axes = plt.subplots(2, 5, figsize=(12, 5.2))
         for ax, (_, r) in zip(axes.ravel(), g0.iterrows()):
             ax.imshow(Image.open(r.path)); ax.set_title(r.variant); ax.axis("off")
         axes.ravel()[-1].axis("off")
-        fig.suptitle(f"Một nhóm ảnh tương tự: '{group}' (gốc + 8 biến thể)")
+        fig.suptitle(f"Một nhóm ảnh tương tự: '{group}' (9 góc chụp độc lập)")
         self._save("01_nhom_anh_tuong_tu.png")
 
         names = list(ds.meta.group.unique())[:16]
         fig, axes = plt.subplots(2, 8, figsize=(15, 4.6))
         for ax, n in zip(axes.ravel(), names):
-            ax.imshow(Image.open(ds.meta[(ds.meta.group == n) & (ds.meta.variant == "orig")].path.iloc[0])); ax.set_title(n, fontsize=7); ax.axis("off")
-        fig.suptitle("Các ảnh gốc khác nhau (cặp không tương tự)")
+            ax.imshow(Image.open(ds.meta[(ds.meta.group == n) & (ds.meta.variant == "view000")].path.iloc[0])); ax.set_title(n, fontsize=7); ax.axis("off")
+        fig.suptitle("Các vật thể khác nhau (cặp không tương tự)")
         self._save("02_cac_anh_goc.png")
 
     def decomposition(self, gray, wavelet="db4", level=3):
@@ -67,7 +67,7 @@ class Reporter:
         fig, axes = plt.subplots(1, len(methods), figsize=(15, 3.6), sharey=True)
         for ax, m in zip(axes, methods):
             pv = survey[survey.method == m].pivot(index="wavelet", columns="level", values="AUC").loc[list(wavelets)]
-            im = ax.imshow(pv.values, vmin=.65, vmax=1, cmap="viridis", aspect="auto")
+            im = ax.imshow(pv.values, vmin=0, vmax=1, cmap="viridis", aspect="auto")
             ax.set_xticks(range(pv.shape[1])); ax.set_xticklabels(pv.columns)
             ax.set_yticks(range(len(wavelets))); ax.set_yticklabels(pv.index)
             ax.set_xlabel("mức phân rã"); ax.set_title(m)

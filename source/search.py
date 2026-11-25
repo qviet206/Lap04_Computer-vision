@@ -1,5 +1,6 @@
 """Ứng dụng tìm kiếm ảnh dựa trên hàm băm wavelet."""
 import json
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -35,7 +36,7 @@ class WaveletImageSearch:
         return [(self.paths[i], int(d[i])) for i in order]
 
     def save(self, f):
-        np.savez_compressed(f, paths=np.array(self.paths), codes=self.codes, nbits=self.nbits,
+        np.savez_compressed(f, paths=np.array([str(Path(p).resolve().relative_to(Path(f).resolve().parent.parent)) for p in self.paths]), codes=self.codes, nbits=self.nbits,
                             spec=json.dumps(dict(self.spec, size=self.size)))
 
     @classmethod
@@ -43,7 +44,7 @@ class WaveletImageSearch:
         z = np.load(f, allow_pickle=False)
         spec = json.loads(str(z["spec"]))
         e = cls(create_hasher(spec["method"], spec.get("wavelet", "haar"), spec.get("level", 3)), spec["size"], spec)
-        e.paths, e.codes, e.nbits = list(z["paths"]), z["codes"], int(z["nbits"])
+        e.paths, e.codes, e.nbits = [str(Path(f).resolve().parent.parent / p) for p in z["paths"]], z["codes"], int(z["nbits"])
         return e
 
 

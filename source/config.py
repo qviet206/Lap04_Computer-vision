@@ -8,9 +8,7 @@ class Config:
     root: Path = Path(__file__).resolve().parent.parent
     seed: int = 42
     size: int = 64                      # ảnh chuẩn hoá về size x size (luỹ thừa của 2)
-    sources: tuple = ("astronaut", "coffee", "chelsea", "rocket", "camera", "coins", "moon",
-                      "hubble_deep_field", "immunohistochemistry", "brick", "gravel", "horse",
-                      "clock", "colorwheel", "page", "cell")
+    sources: tuple = tuple(f"obj{i:02d}" for i in range(1, 17))
     wavelets: tuple = ("haar", "db2", "db4", "sym4", "bior1.3")
     levels: tuple = (2, 3, 4)
 

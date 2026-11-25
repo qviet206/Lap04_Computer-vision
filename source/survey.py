@@ -38,7 +38,7 @@ class HashSurvey:
         return pd.DataFrame(rows)
 
     def per_variant_sensitivity(self, configs: dict) -> pd.DataFrame:
-        """Độ nhạy theo từng biến thể (cặp gốc–biến thể), ngưỡng Youden kiểm định chéo 2 phần."""
+        """Độ nhạy theo từng góc chụp (so với góc 0 độ), ngưỡng Youden kiểm định chéo 2 phần."""
         train, m_tr, m_te = self.ds.split_groups()
         out = {}
         for label, kw in configs.items():
@@ -48,11 +48,11 @@ class HashSurvey:
             Dm = HammingComparator.matrix(self.codes(**kw))
             col = {}
             for v in self.ds.meta.variant.unique():
-                if v == "orig":
+                if v == "view000":
                     continue
                 hit = []
                 for g in self.ds.meta.group.unique():
-                    i, j = self.ds.index_of(g, "orig"), self.ds.index_of(g, v)
+                    i, j = self.ds.index_of(g, "view000"), self.ds.index_of(g, v)
                     hit.append(Dm[i, j] <= (T_te if g in train else T_tr))   # ngưỡng từ nửa còn lại
                 col[v] = float(np.mean(hit))
             out[label] = col
